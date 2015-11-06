@@ -46,7 +46,7 @@ func (q Query) Get(m Message) (hl7.Data, bool) {
 		return s, true
 	}
 
-	f, ok := s.Index(q.Field - 1)
+	f, ok := s.Index(q.Field)
 	if !ok {
 		return nil, false
 	}
