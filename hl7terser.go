@@ -153,3 +153,110 @@ func (q Query) GetString(m Message) string {
 
 	return f.String()
 }
+
+func (q Query) GetCount(m Message) int {
+	ss := m.Segments(q.Segment)
+	if !q.HasField && !q.HasSegmentRepeat {
+		return len(ss)
+	}
+
+	s, ok := m.Segment(q.Segment, q.SegmentRepeat)
+	if !ok {
+		return 0
+	}
+
+	if !q.HasField {
+		return 1
+	}
+
+	f, ok := s.Index(q.Field)
+	if !ok {
+		return 0
+	}
+	if b, ok := f.(hl7.Field); ok {
+		if len([]byte(b)) == 0 {
+			return 0
+		}
+	}
+
+	if !q.HasComponent && !q.HasFieldRepeat {
+		if fr, ok := f.(hl7.Repeated); ok {
+			return fr.Len()
+		}
+
+		return 1
+	}
+
+	if fr, ok := f.(hl7.Repeated); ok {
+		f, ok = fr.Index(q.FieldRepeat)
+		if !ok {
+			return 0
+		}
+	} else if q.FieldRepeat != 0 {
+		return 0
+	}
+
+	if !q.HasComponent {
+		return f.Len()
+	}
+
+	c, ok := f.Index(q.Component - 1)
+	if !ok {
+		return 0
+	}
+	if b, ok := f.(hl7.Field); ok {
+		if len([]byte(b)) == 0 {
+			return 0
+		}
+	}
+
+	if !q.HasSubComponent && !q.HasComponentRepeat {
+		if cr, ok := f.(hl7.Repeated); ok {
+			return cr.Len()
+		}
+
+		return 1
+	}
+
+	if cr, ok := c.(hl7.Repeated); ok {
+		c, ok = cr.Index(q.ComponentRepeat)
+		if !ok {
+			return 0
+		}
+	} else if q.ComponentRepeat != 0 {
+		return 0
+	}
+
+	if !q.HasSubComponent {
+		if scr, ok := f.(hl7.Repeated); ok {
+			return len(scr)
+		}
+
+		return 1
+	}
+
+	if cr, ok := c.(hl7.Repeated); ok {
+		c, ok = cr.Index(q.ComponentRepeat)
+		if !ok {
+			return 0
+		}
+	} else if q.ComponentRepeat != 0 {
+		return 0
+	}
+
+	sc, ok := c.Index(q.SubComponent - 1)
+	if !ok {
+		return 0
+	}
+
+	if scr, ok := sc.(hl7.Repeated); ok {
+		sc, ok = scr.Index(q.SubComponentRepeat)
+		if !ok {
+			return 0
+		}
+	} else if q.SubComponentRepeat != 0 {
+		return 0
+	}
+
+	return 1
+}
