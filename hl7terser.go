@@ -1,6 +1,8 @@
 package hl7terser
 
 import (
+	"fmt"
+
 	"github.com/kdar/health/hl7"
 )
 
@@ -41,6 +43,46 @@ func New(segment string, segmentRepeat, field, fieldRepeat, component, component
 		SubComponent:       subComponent,
 		SubComponentRepeat: subComponentRepeat,
 	}
+}
+
+func (q Query) String() string {
+	s := q.Segment
+
+	if q.HasSegmentRepeat {
+		s += fmt.Sprintf("(%d)", q.SegmentRepeat)
+	}
+
+	if !q.HasField {
+		return s
+	}
+
+	s += fmt.Sprintf("-%d", q.Field)
+
+	if q.HasFieldRepeat {
+		s += fmt.Sprintf("(%d)", q.FieldRepeat)
+	}
+
+	if !q.HasComponent {
+		return s
+	}
+
+	s += fmt.Sprintf("-%d", q.Component)
+
+	if q.HasComponentRepeat {
+		s += fmt.Sprintf("(%d)", q.ComponentRepeat)
+	}
+
+	if !q.HasSubComponent {
+		return s
+	}
+
+	s += fmt.Sprintf("-%d", q.SubComponent)
+
+	if q.HasComponentRepeat {
+		s += fmt.Sprintf("(%d)", q.SubComponentRepeat)
+	}
+
+	return s
 }
 
 func (q Query) Get(m Message) (hl7.Data, bool) {
