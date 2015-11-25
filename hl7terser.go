@@ -154,7 +154,7 @@ func (q Query) GetString(m Message) string {
 	return f.String()
 }
 
-func (q Query) GetCount(m Message) int {
+func (q Query) Count(m Message) int {
 	ss := m.Segments(q.Segment)
 	if !q.HasField && !q.HasSegmentRepeat {
 		return len(ss)

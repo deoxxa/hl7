@@ -91,7 +91,7 @@ func TestCount(t *testing.T) {
 			t.Error(err)
 		}
 
-		l := q.GetCount(Message(s))
+		l := q.Count(Message(s))
 
 		if l != c.c {
 			t.Errorf("expected count to be %d; was %d (%q)", c.c, l, c.q)
