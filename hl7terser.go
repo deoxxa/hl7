@@ -5,14 +5,21 @@ import (
 )
 
 type Query struct {
-	Segment            string
-	SegmentRepeat      int
-	Field              int
-	FieldRepeat        int
-	Component          int
-	ComponentRepeat    int
-	SubComponent       int
-	SubComponentRepeat int
+	Segment               string
+	HasSegmentRepeat      bool
+	SegmentRepeat         int
+	HasField              bool
+	Field                 int
+	HasFieldRepeat        bool
+	FieldRepeat           int
+	HasComponent          bool
+	Component             int
+	HasComponentRepeat    bool
+	ComponentRepeat       int
+	HasSubComponent       bool
+	SubComponent          int
+	HasSubComponentRepeat bool
+	SubComponentRepeat    int
 }
 
 func New(segment string, segmentRepeat, field, fieldRepeat, component, componentRepeat, subComponent, subComponentRepeat int) Query {
