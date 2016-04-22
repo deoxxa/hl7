@@ -107,6 +107,36 @@ func TestParseTwoSegments(t *testing.T) {
 	}, m)
 }
 
+func TestParseSimpleNohexContent(t *testing.T) {
+	a := assert.New(t)
+
+	m, d, err := Parse(simpleNohexContent)
+	a.NoError(err)
+	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
+	a.Equal(Message{
+		Segment{
+			Field{FieldItem{Component{"MSH"}}},
+			Field{FieldItem{Component{"|^~\\&"}}},
+			Field{FieldItem{Component{"field"}}},
+			Field{FieldItem{
+				Component{"\\|~^&HEY"},
+			}},
+			Field{FieldItem{
+				Component{"component1"},
+				Component{"component2"},
+			}},
+			Field{FieldItem{
+				Component{"subcomponent1a", "subcomponent2a"},
+				Component{"subcomponent1b", "subcomponent2b"},
+			}},
+			Field{
+				FieldItem{Component{"component1a"}, Component{"component2a"}},
+				FieldItem{Component{"component1b"}, Component{"component2b"}},
+			},
+		},
+	}, m)
+}
+
 func TestParseSimpleContent(t *testing.T) {
 	a := assert.New(t)
 
