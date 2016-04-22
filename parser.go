@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
-
-	"fknsrs.biz/p/supersplit"
 )
 
 type (
@@ -40,69 +38,103 @@ func Parse(buf []byte) (Message, *Delimiters, error) {
 		return nil, nil, fmt.Errorf("expected message to begin with MSH")
 	}
 
-	fs := string(buf[3])
-	cs := string(buf[4])
-	rs := string(buf[5])
-	ec := string(buf[6])
-	ss := string(buf[7])
+	fs := buf[3]
+	cs := buf[4]
+	rs := buf[5]
+	ec := buf[6]
+	ss := buf[7]
 
-	d := Delimiters{fs, cs, rs, ec, ss}
+	d := Delimiters{string(fs), string(cs), string(rs), string(ec), string(ss)}
 
-	lines := bytes.Split(buf, []byte("\r"))
+	var (
+		message   Message
+		segment   Segment
+		field     Field
+		fieldItem FieldItem
+		component Component
+		s         []byte
+	)
 
-	m := make(Message, len(lines))
-
-	for lIndex, l := range lines {
-		// cut off the header (two fields) for the first segment
-		if lIndex == 0 {
-			l = l[9:]
-		}
-
-		lBits := supersplit.Escaped(string(l), fs, ec)
-
-		// put two empty fields at the start for the first segment
-		if lIndex == 0 {
-			lBits = append([]string{"", ""}, lBits...)
-		}
-
-		segment := make(Segment, len(lBits))
-
-		for findex, fString := range lBits {
-			fBits := supersplit.Escaped(fString, rs, ec)
-
-			field := make(Field, len(fBits))
-
-			for rIndex, rString := range fBits {
-				rBits := supersplit.Escaped(rString, cs, ec)
-
-				fieldItem := make(FieldItem, len(rBits))
-
-				for cIndex, cString := range rBits {
-					cBits := supersplit.Escaped(cString, ss, ec)
-
-					component := make(Component, len(cBits))
-
-					for sIndex, sString := range cBits {
-						component[sIndex] = Subcomponent(escaped(sString, &d))
-					}
-
-					fieldItem[cIndex] = component
-				}
-
-				field[rIndex] = fieldItem
-			}
-
-			segment[findex] = field
-		}
-
-		// manually fill in the header for the first segment
-		if lIndex == 0 {
-			segment[0] = Field{FieldItem{Component{Subcomponent("MSH")}}}
-			segment[1] = Field{FieldItem{Component{Subcomponent(string(buf[3:8]))}}}
-		}
-
-		m[lIndex] = segment
+	segment = Segment{
+		Field{FieldItem{Component{Subcomponent("MSH")}}},
+		Field{FieldItem{Component{Subcomponent(string(buf[3:8]))}}},
 	}
 
-	return m, &d, nil
+	commitBuffer := func(force bool) {
+		if s != nil || force {
+			component = append(component, Subcomponent(s))
+			s = nil
+		}
+	}
+
+	commitComponent := func(force bool) {
+		commitBuffer(false)
+
+		if component != nil || force {
+			fieldItem = append(fieldItem, component)
+			component = nil
+		}
+	}
+
+	commitFieldItem := func(force bool) {
+		commitComponent(false)
+
+		if fieldItem != nil || force {
+			field = append(field, fieldItem)
+			fieldItem = nil
+		}
+	}
+
+	commitField := func(force bool) {
+		commitFieldItem(false)
+
+		if field != nil || force {
+			segment = append(segment, field)
+			field = nil
+		}
+	}
+
+	commitSegment := func(force bool) {
+		commitField(false)
+
+		if segment != nil || force {
+			message = append(message, segment)
+			segment = nil
+		}
+	}
+
+	escaping := false
+	for _, c := range buf[9:] {
+		switch escaping {
+		case true:
+			switch c {
+			case fs, cs, rs, ec, ss:
+				s = append(s, c)
+			default:
+				s = append(s, ec, c)
+			}
+			escaping = false
+		case false:
+			switch c {
+			case ec:
+				escaping = true
+			case '\r':
+				commitSegment(true)
+			case fs:
+				commitField(true)
+			case rs:
+				commitFieldItem(true)
+			case cs:
+				commitComponent(true)
+			case ss:
+				commitBuffer(true)
+			default:
+				s = append(s, c)
+			}
+		}
+	}
+
+	commitSegment(false)
+
+	return message, &d, nil
 }
