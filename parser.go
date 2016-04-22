@@ -100,19 +100,28 @@ func Parse(buf []byte) (Message, *Delimiters, error) {
 		}
 	}
 
+	sawNewline := false
 	for _, c := range buf[9:] {
 		switch c {
-		case '\r':
-			commitSegment(true)
+		case '\r', '\n':
+			if !sawNewline {
+				commitSegment(true)
+			}
+			sawNewline = true
 		case fs:
+			sawNewline = false
 			commitField(true)
 		case rs:
+			sawNewline = false
 			commitFieldItem(true)
 		case cs:
+			sawNewline = false
 			commitComponent(true)
 		case ss:
+			sawNewline = false
 			commitBuffer(true)
 		default:
+			sawNewline = false
 			s = append(s, c)
 		}
 	}
