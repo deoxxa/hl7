@@ -100,34 +100,20 @@ func Parse(buf []byte) (Message, *Delimiters, error) {
 		}
 	}
 
-	escaping := false
 	for _, c := range buf[9:] {
-		switch escaping {
-		case true:
-			switch c {
-			case fs, cs, rs, ec, ss:
-				s = append(s, c)
-			default:
-				s = append(s, ec, c)
-			}
-			escaping = false
-		case false:
-			switch c {
-			case ec:
-				escaping = true
-			case '\r':
-				commitSegment(true)
-			case fs:
-				commitField(true)
-			case rs:
-				commitFieldItem(true)
-			case cs:
-				commitComponent(true)
-			case ss:
-				commitBuffer(true)
-			default:
-				s = append(s, c)
-			}
+		switch c {
+		case '\r':
+			commitSegment(true)
+		case fs:
+			commitField(true)
+		case rs:
+			commitFieldItem(true)
+		case cs:
+			commitComponent(true)
+		case ss:
+			commitBuffer(true)
+		default:
+			s = append(s, c)
 		}
 	}
 
@@ -140,22 +126,29 @@ func unescape(b []byte, d *Delimiters) []byte {
 	r := make([]byte, len(b))
 
 	j, e := 0, false
-	for _, c := range b {
+	for i := 0; i < len(b); i++ {
+		c := b[i]
+
 		switch e {
 		case true:
 			switch c {
 			case 'F':
 				r[j] = d.Field
+				i++
 			case 'S':
 				r[j] = d.Component
+				i++
 			case 'T':
 				r[j] = d.Subcomponent
+				i++
 			case 'R':
 				r[j] = d.Repeat
+				i++
 			case 'E':
 				r[j] = d.Escape
+				i++
 			default:
-				r[j] = '\\'
+				r[j] = d.Escape
 				j++
 				r[j] = c
 			}
@@ -165,7 +158,7 @@ func unescape(b []byte, d *Delimiters) []byte {
 			e = false
 		case false:
 			switch c {
-			case '\\':
+			case d.Escape:
 				e = true
 			default:
 				r[j] = c
