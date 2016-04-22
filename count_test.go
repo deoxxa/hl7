@@ -18,7 +18,7 @@ var countTestCases = []countTestCase{
 	countTestCase{"MSH", 1, []byte(longTestMessageContent)},
 	countTestCase{"OBX", 47, []byte(longTestMessageContent)},
 	countTestCase{"WWW", 0, []byte(longTestMessageContent)},
-	countTestCase{"MSH(1)", 15, []byte(longTestMessageContent)},
+	countTestCase{"MSH(1)", 16, []byte(longTestMessageContent)},
 	countTestCase{"OBX(1)", 7, []byte(longTestMessageContent)},
 	countTestCase{"WWW(1)", 0, []byte(longTestMessageContent)},
 	countTestCase{"MSH(2)", 0, []byte(longTestMessageContent)},
