@@ -63,6 +63,11 @@ func (q Query) String() string {
 	return s
 }
 
+func (q Query) GetString(m hl7parser.Message) string {
+	s, _ := q.Get(m)
+	return s
+}
+
 func (q Query) Get(m hl7parser.Message) (string, bool) {
 	s := m.Segment(q.Segment, q.SegmentOffset)
 
