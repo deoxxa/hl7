@@ -34,7 +34,8 @@ func TestParseOneSegment(t *testing.T) {
 	a.Equal(Message{
 		Segment{
 			Field{FieldItem{Component{"MSH"}}},
-			Field{FieldItem{Component{"|^~\\&"}}},
+			Field{FieldItem{Component{"|"}}},
+			Field{FieldItem{Component{"^~\\&"}}},
 			Field{FieldItem{Component{"IPM"}}},
 			Field{FieldItem{Component{"1919"}}},
 			Field{FieldItem{Component{"SUPERHOSPITAL"}}},
@@ -68,7 +69,8 @@ func TestParseTwoSegments(t *testing.T) {
 	a.Equal(Message{
 		Segment{
 			Field{FieldItem{Component{"MSH"}}},
-			Field{FieldItem{Component{"|^~\\&"}}},
+			Field{FieldItem{Component{"|"}}},
+			Field{FieldItem{Component{"^~\\&"}}},
 			Field{FieldItem{Component{"IPM"}}},
 			Field{FieldItem{Component{"1919"}}},
 			Field{FieldItem{Component{"SUPERHOSPITAL"}}},
@@ -116,7 +118,8 @@ func TestParseSampleContent(t *testing.T) {
 	a.Equal(Message{
 		Segment{
 			Field{FieldItem{Component{"MSH"}}},
-			Field{FieldItem{Component{"|^~\\&"}}},
+			Field{FieldItem{Component{"|"}}},
+			Field{FieldItem{Component{"^~\\&"}}},
 			Field{FieldItem{Component{"EP^IC"}}},
 			Field{FieldItem{Component{"EPICADT"}}},
 			Field{FieldItem{Component{"SMS"}}},
@@ -251,7 +254,8 @@ func TestParseSimpleNohexContent(t *testing.T) {
 	a.Equal(Message{
 		Segment{
 			Field{FieldItem{Component{"MSH"}}},
-			Field{FieldItem{Component{"|^~\\&"}}},
+			Field{FieldItem{Component{"|"}}},
+			Field{FieldItem{Component{"^~\\&"}}},
 			Field{FieldItem{Component{"field"}}},
 			Field{FieldItem{
 				Component{"\\|~^&HEY"},
@@ -281,7 +285,8 @@ func TestParseSimpleContent(t *testing.T) {
 	a.Equal(Message{
 		Segment{
 			Field{FieldItem{Component{"MSH"}}},
-			Field{FieldItem{Component{"|^~\\&"}}},
+			Field{FieldItem{Component{"|"}}},
+			Field{FieldItem{Component{"^~\\&"}}},
 			Field{FieldItem{Component{"field"}}},
 			Field{FieldItem{
 				Component{"\\|~^&\\X484559"},

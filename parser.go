@@ -81,7 +81,8 @@ func Parse(buf []byte) (Message, *Delimiters, error) {
 
 	segment = Segment{
 		Field{FieldItem{Component{Subcomponent("MSH")}}},
-		Field{FieldItem{Component{Subcomponent(string(buf[3:8]))}}},
+		Field{FieldItem{Component{Subcomponent(buf[3])}}},
+		Field{FieldItem{Component{Subcomponent(string(buf[4:8]))}}},
 	}
 
 	commitBuffer := func(force bool) {
