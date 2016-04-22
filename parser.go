@@ -2,8 +2,15 @@ package hl7parser
 
 import (
 	"bytes"
-	"fmt"
-	"strings"
+	"errors"
+)
+
+var (
+	// ErrTooShort is returned if a message isn't long enough to contain a valid
+	// header
+	ErrTooShort = errors.New("message must be at least eight bytes long")
+	// ErrInvalidHeader is returned if a message doesn't start with "MSH"
+	ErrInvalidHeader = errors.New("expected message to begin with MSH")
 )
 
 type (
@@ -15,27 +22,17 @@ type (
 	Subcomponent string
 )
 
-func escaped(s string, d *Delimiters) string {
-	return strings.NewReplacer(
-		"\\F", d.Field,
-		"\\S", d.Component,
-		"\\T", d.Subcomponent,
-		"\\R", d.Repeat,
-		"\\E", d.Escape,
-	).Replace(s)
-}
-
 type Delimiters struct {
-	Field, Component, Repeat, Escape, Subcomponent string
+	Field, Component, Repeat, Escape, Subcomponent byte
 }
 
 func Parse(buf []byte) (Message, *Delimiters, error) {
 	if len(buf) < 8 {
-		return nil, nil, fmt.Errorf("message must be at least eight bytes long")
+		return nil, nil, ErrTooShort
 	}
 
 	if !bytes.HasPrefix(buf, []byte("MSH")) {
-		return nil, nil, fmt.Errorf("expected message to begin with MSH")
+		return nil, nil, ErrInvalidHeader
 	}
 
 	fs := buf[3]
@@ -44,7 +41,7 @@ func Parse(buf []byte) (Message, *Delimiters, error) {
 	ec := buf[6]
 	ss := buf[7]
 
-	d := Delimiters{string(fs), string(cs), string(rs), string(ec), string(ss)}
+	d := Delimiters{fs, cs, rs, ec, ss}
 
 	var (
 		message   Message
@@ -62,7 +59,7 @@ func Parse(buf []byte) (Message, *Delimiters, error) {
 
 	commitBuffer := func(force bool) {
 		if s != nil || force {
-			component = append(component, Subcomponent(s))
+			component = append(component, Subcomponent(unescape(s, &d)))
 			s = nil
 		}
 	}
@@ -137,4 +134,45 @@ func Parse(buf []byte) (Message, *Delimiters, error) {
 	commitSegment(false)
 
 	return message, &d, nil
+}
+
+func unescape(b []byte, d *Delimiters) []byte {
+	r := make([]byte, len(b))
+
+	j, e := 0, false
+	for _, c := range b {
+		switch e {
+		case true:
+			switch c {
+			case 'F':
+				r[j] = d.Field
+			case 'S':
+				r[j] = d.Component
+			case 'T':
+				r[j] = d.Subcomponent
+			case 'R':
+				r[j] = d.Repeat
+			case 'E':
+				r[j] = d.Escape
+			default:
+				r[j] = '\\'
+				j++
+				r[j] = c
+			}
+
+			j++
+
+			e = false
+		case false:
+			switch c {
+			case '\\':
+				e = true
+			default:
+				r[j] = c
+				j++
+			}
+		}
+	}
+
+	return r[:j]
 }

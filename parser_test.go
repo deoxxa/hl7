@@ -30,7 +30,7 @@ func TestParseOneSegment(t *testing.T) {
 
 	m, d, err := Parse([]byte(`MSH|^~\&|IPM|1919|SUPERHOSPITAL|1919|20160101000000||ADT^A08|555544444|D|2.4|||AL|NE`))
 	a.NoError(err)
-	a.Equal(&Delimiters{"|", "^", "~", "\\", "&"}, d)
+	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
 	a.Equal(Message{
 		Segment{
 			Field{FieldItem{Component{Subcomponent("MSH")}}},
@@ -64,7 +64,7 @@ func TestParseTwoSegments(t *testing.T) {
 		`EVN|A08|20160101000001||BATMAN_U|SHBOLTONM^Bolton, Michael^^^^^^USERS`,
 	}, "\r")))
 	a.NoError(err)
-	a.Equal(&Delimiters{"|", "^", "~", "\\", "&"}, d)
+	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
 	a.Equal(Message{
 		Segment{
 			Field{FieldItem{Component{Subcomponent("MSH")}}},
