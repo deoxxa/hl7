@@ -2,15 +2,16 @@ package hl7parser
 
 import (
 	"bytes"
-	"errors"
+
+	"github.com/facebookgo/stackerr"
 )
 
-var (
+type (
 	// ErrTooShort is returned if a message isn't long enough to contain a valid
 	// header
-	ErrTooShort = errors.New("message must be at least eight bytes long")
+	ErrTooShort error
 	// ErrInvalidHeader is returned if a message doesn't start with "MSH"
-	ErrInvalidHeader = errors.New("expected message to begin with MSH")
+	ErrInvalidHeader error
 )
 
 type (
@@ -55,11 +56,11 @@ type Delimiters struct {
 
 func Parse(buf []byte) (Message, *Delimiters, error) {
 	if len(buf) < 8 {
-		return nil, nil, ErrTooShort
+		return nil, nil, ErrTooShort(stackerr.Newf("message must be at least eight bytes long; instead was %d", len(buf)))
 	}
 
 	if !bytes.HasPrefix(buf, []byte("MSH")) {
-		return nil, nil, ErrInvalidHeader
+		return nil, nil, ErrInvalidHeader(stackerr.Newf("expected message to begin with MSH; instead found %q", buf[0:3]))
 	}
 
 	fs := buf[3]
