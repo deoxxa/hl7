@@ -241,8 +241,6 @@ func TestParseSampleContent(t *testing.T) {
 			Field{FieldItem{Component{"002376853\""}}},
 		},
 	}, m)
-
-	t.Logf("%#v\n", m)
 }
 
 func TestParseSimpleNohexContent(t *testing.T) {
