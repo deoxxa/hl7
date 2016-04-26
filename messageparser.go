@@ -127,7 +127,7 @@ func ParseMessage(buf []byte) (Message, *Delimiters, error) {
 		}
 	}
 
-	// This is the main parse loop. We go through the buffer byte-by-byte,
+	// This is the main parse loop. We go through the input byte-by-byte,
 	// accumulating data until we hit any of the control characters. When we do,
 	// we commit whatever we have "buffered" for that level. Carriage returns
 	// and line breaks count as control characters, as they delimit segments
