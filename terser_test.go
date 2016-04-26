@@ -1,4 +1,4 @@
-package hl7terser
+package hl7
 
 import (
 	"testing"

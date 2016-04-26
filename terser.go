@@ -1,9 +1,7 @@
-package hl7terser
+package hl7
 
 import (
 	"fmt"
-
-	"fknsrs.biz/p/hl7parser"
 )
 
 type Query struct {
@@ -63,12 +61,12 @@ func (q Query) String() string {
 	return s
 }
 
-func (q Query) GetString(m hl7parser.Message) string {
+func (q Query) GetString(m Message) string {
 	s, _ := q.Get(m)
 	return s
 }
 
-func (q Query) Get(m hl7parser.Message) (string, bool) {
+func (q Query) Get(m Message) (string, bool) {
 	s := m.Segment(q.Segment, q.SegmentOffset)
 
 	if len(s) <= q.Field+1 {
@@ -93,7 +91,7 @@ func (q Query) Get(m hl7parser.Message) (string, bool) {
 	return string(c[q.SubComponent]), true
 }
 
-func (q Query) Count(m hl7parser.Message) int {
+func (q Query) Count(m Message) int {
 	if !q.HasSegmentOffset && !q.HasField {
 		return len(m.Segments(q.Segment))
 	}

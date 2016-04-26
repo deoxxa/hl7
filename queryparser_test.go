@@ -1,4 +1,4 @@
-package hl7terser
+package hl7
 
 import (
 	"testing"
@@ -115,11 +115,11 @@ var parserTestCases = []parserTestPair{
 	}},
 }
 
-func TestParse(t *testing.T) {
+func TestParseQuery(t *testing.T) {
 	a := assert.New(t)
 
 	for _, c := range parserTestCases {
-		q, err := Parse(c.s)
+		q, err := ParseQuery(c.s)
 		a.NoError(err)
 
 		if a.NotNil(q) {

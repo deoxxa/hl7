@@ -1,4 +1,4 @@
-package hl7parser
+package hl7
 
 import (
 	"bytes"
@@ -14,47 +14,11 @@ type (
 	ErrInvalidHeader error
 )
 
-type (
-	Message      []Segment
-	Segment      []Field
-	Field        []FieldItem
-	FieldItem    []Component
-	Component    []Subcomponent
-	Subcomponent string
-)
-
-func (m Message) Segments(name string) []Segment {
-	var a []Segment
-
-	for _, s := range m {
-		if string(s[0][0][0][0]) == name {
-			a = append(a, s)
-		}
-	}
-
-	return a
-}
-
-func (m Message) Segment(name string, index int) Segment {
-	i := 0
-	for _, s := range m {
-		if string(s[0][0][0][0]) == name {
-			if i == index {
-				return s
-			}
-
-			i++
-		}
-	}
-
-	return nil
-}
-
 type Delimiters struct {
 	Field, Component, Repeat, Escape, Subcomponent byte
 }
 
-func Parse(buf []byte) (Message, *Delimiters, error) {
+func ParseMessage(buf []byte) (Message, *Delimiters, error) {
 	if len(buf) < 8 {
 		return nil, nil, ErrTooShort(stackerr.Newf("message must be at least eight bytes long; instead was %d", len(buf)))
 	}

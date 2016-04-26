@@ -1,11 +1,9 @@
-package hl7terser
+package hl7
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"fknsrs.biz/p/hl7parser"
 )
 
 type countTestCase struct {
@@ -84,10 +82,10 @@ func TestCount(t *testing.T) {
 	a := assert.New(t)
 
 	for _, c := range countTestCases {
-		q, err := Parse(c.q)
+		q, err := ParseQuery(c.q)
 		a.NoError(err)
 
-		m, _, err := hl7parser.Parse(c.m)
+		m, _, err := ParseMessage(c.m)
 		a.NoError(err)
 
 		if a.NotNil(q) && a.NotNil(m) {

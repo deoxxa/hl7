@@ -1,4 +1,4 @@
-package hl7terser
+package hl7
 
 import (
 	"fmt"
@@ -7,17 +7,17 @@ import (
 )
 
 var (
-	ErrInvalidParse = fmt.Errorf("can't parse query")
+	ErrInvalidQuery = fmt.Errorf("can't parse query")
 )
 
 var (
 	terserRegexp = regexp.MustCompile(`^([A-Z][A-Z0-9]+)(?:\(([0-9]{1,3})\))?(?:-([0-9]{1,3})(?:\(([0-9]{1,3})\))?(?:-([0-9]{1,3})(?:-([0-9]{1,3}))?)?)?$`)
 )
 
-func Parse(s string) (*Query, error) {
+func ParseQuery(s string) (*Query, error) {
 	m := terserRegexp.FindStringSubmatch(s)
 	if m == nil {
-		return nil, ErrInvalidParse
+		return nil, ErrInvalidQuery
 	}
 
 	var q Query

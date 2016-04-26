@@ -1,4 +1,4 @@
-package hl7parser
+package hl7
 
 import (
 	"io/ioutil"
@@ -28,7 +28,7 @@ var (
 func TestParseOneSegment(t *testing.T) {
 	a := assert.New(t)
 
-	m, d, err := Parse([]byte(`MSH|^~\&|IPM|1919|SUPERHOSPITAL|1919|20160101000000||ADT^A08|555544444|D|2.4|||AL|NE`))
+	m, d, err := ParseMessage([]byte(`MSH|^~\&|IPM|1919|SUPERHOSPITAL|1919|20160101000000||ADT^A08|555544444|D|2.4|||AL|NE`))
 	a.NoError(err)
 	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
 	a.Equal(Message{
@@ -60,7 +60,7 @@ func TestParseOneSegment(t *testing.T) {
 func TestParseTwoSegments(t *testing.T) {
 	a := assert.New(t)
 
-	m, d, err := Parse([]byte(strings.Join([]string{
+	m, d, err := ParseMessage([]byte(strings.Join([]string{
 		`MSH|^~\&|IPM|1919|SUPERHOSPITAL|1919|20160101000000||ADT^A08|555544444|D|2.4|||AL|NE`,
 		`EVN|A08|20160101000001||BATMAN_U|SHBOLTONM^Bolton, Michael^^^^^^USERS`,
 	}, "\r")))
@@ -112,7 +112,7 @@ func TestParseTwoSegments(t *testing.T) {
 func TestParseSampleContent(t *testing.T) {
 	a := assert.New(t)
 
-	m, d, err := Parse(sampleContent)
+	m, d, err := ParseMessage(sampleContent)
 	a.NoError(err)
 	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
 	a.Equal(Message{
@@ -248,7 +248,7 @@ func TestParseSampleContent(t *testing.T) {
 func TestParseSimpleNohexContent(t *testing.T) {
 	a := assert.New(t)
 
-	m, d, err := Parse(simpleNohexContent)
+	m, d, err := ParseMessage(simpleNohexContent)
 	a.NoError(err)
 	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
 	a.Equal(Message{
@@ -279,7 +279,7 @@ func TestParseSimpleNohexContent(t *testing.T) {
 func TestParseSimpleContent(t *testing.T) {
 	a := assert.New(t)
 
-	m, d, err := Parse(simpleContent)
+	m, d, err := ParseMessage(simpleContent)
 	a.NoError(err)
 	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
 	a.Equal(Message{
@@ -309,30 +309,30 @@ func TestParseSimpleContent(t *testing.T) {
 
 func BenchmarkAllElementsContent(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Parse(allElementsContent)
+		ParseMessage(allElementsContent)
 	}
 }
 
 func BenchmarkSampleContent(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Parse(sampleContent)
+		ParseMessage(sampleContent)
 	}
 }
 
 func BenchmarkSimpleContent(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Parse(simpleContent)
+		ParseMessage(simpleContent)
 	}
 }
 
 func BenchmarkSimpleNohexContent(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Parse(simpleNohexContent)
+		ParseMessage(simpleNohexContent)
 	}
 }
 
 func BenchmarkVaersLongContent(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Parse(vaersLongContent)
+		ParseMessage(vaersLongContent)
 	}
 }
