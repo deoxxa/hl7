@@ -1,9 +1,10 @@
 package hl7 // import "fknsrs.biz/p/hl7"
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
+
+	"github.com/facebookgo/stackerr"
 )
 
 type ErrInvalidQuery error
@@ -15,7 +16,7 @@ var (
 func ParseQuery(s string) (*Query, error) {
 	m := terserRegexp.FindStringSubmatch(s)
 	if m == nil {
-		return nil, fmt.Errorf("can't parse query")
+		return nil, stackerr.Newf("can't parse query")
 	}
 
 	var q Query
