@@ -1,5 +1,9 @@
 package hl7 // import "fknsrs.biz/p/hl7"
 
+import (
+	"github.com/facebookgo/stackerr"
+)
+
 type (
 	Message      []Segment
 	Segment      []Field
@@ -34,4 +38,15 @@ func (m Message) Segment(name string, index int) Segment {
 	}
 
 	return nil
+}
+
+func (m Message) Query(s string) (res string, ok bool, err error) {
+	q, err := ParseQuery(s)
+	if err != nil {
+		return "", false, stackerr.Wrap(err)
+	}
+
+	res, ok = q.Get(m)
+
+	return res, ok, nil
 }
