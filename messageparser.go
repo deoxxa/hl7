@@ -95,7 +95,7 @@ func ParseMessage(buf []byte) (Message, *Delimiters, error) {
 	// TODO: find out if there are any implementations of HL7 that *actually*
 	// put more data after this header.
 	if len(buf) > 8 && buf[8] != fs {
-		return nil, nil, ErrInvalidHeader(stackerr.Newf("invalid character found after header content; expected \\x%02x but got \\x%02x", fs, buf[9]))
+		return nil, nil, ErrInvalidHeader(stackerr.Newf("invalid character found after header content; expected \\x%02x but got \\x%02x", fs, buf[8]))
 	}
 
 	// These functions are used when we encounter control characters. When we
