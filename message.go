@@ -1,4 +1,4 @@
-package hl7
+package hl7 // import "fknsrs.biz/p/hl7"
 
 type (
 	Message      []Segment
