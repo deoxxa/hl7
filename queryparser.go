@@ -6,9 +6,7 @@ import (
 	"strconv"
 )
 
-var (
-	ErrInvalidQuery = fmt.Errorf("can't parse query")
-)
+type ErrInvalidQuery error
 
 var (
 	terserRegexp = regexp.MustCompile(`^([A-Z][A-Z0-9]+)(?:\(([0-9]{1,3})\))?(?:-([0-9]{1,3})(?:\(([0-9]{1,3})\))?(?:-([0-9]{1,3})(?:-([0-9]{1,3}))?)?)?$`)
@@ -17,7 +15,7 @@ var (
 func ParseQuery(s string) (*Query, error) {
 	m := terserRegexp.FindStringSubmatch(s)
 	if m == nil {
-		return nil, ErrInvalidQuery
+		return nil, fmt.Errorf("can't parse query")
 	}
 
 	var q Query
