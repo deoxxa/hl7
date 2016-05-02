@@ -305,6 +305,16 @@ func TestParseSimpleContent(t *testing.T) {
 	}, m)
 }
 
+func TestParseBad(t *testing.T) {
+	a := assert.New(t)
+
+	m, d, err := ParseMessage([]byte("MSH00000"))
+
+	a.Error(err)
+	a.Nil(m)
+	a.Nil(d)
+}
+
 func BenchmarkAllElementsContent(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ParseMessage(allElementsContent)
