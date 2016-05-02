@@ -10,7 +10,9 @@ type (
 	// ErrTooShort is returned if a message isn't long enough to contain a valid
 	// header
 	ErrTooShort error
-	// ErrInvalidHeader is returned if a message doesn't start with "MSH"
+	// ErrInvalidHeader is returned if a message doesn't start with "MSH", or
+	// the header isn't exactly the correct length, or any of the control
+	// characters aren't unique
 	ErrInvalidHeader error
 )
 
@@ -48,6 +50,12 @@ func ParseMessage(buf []byte) (Message, *Delimiters, error) {
 	ec := buf[6]
 	ss := buf[7]
 
+	// The spec doesn't actually mandate this, but I can't imagine a case where
+	// it wouldn't be a disaster.
+	if fs == cs || fs == rs || fs == ec || fs == ss || cs == rs || cs == ec || cs == ss || rs == ec || rs == ss || ec == ss {
+		return nil, nil, ErrInvalidHeader(stackerr.Newf("all control characters must be unique"))
+	}
+
 	d := Delimiters{fs, cs, rs, ec, ss}
 
 	// These are the variables we'll be working with. We reuse these variables a
@@ -72,6 +80,22 @@ func ParseMessage(buf []byte) (Message, *Delimiters, error) {
 		Field{FieldItem{Component{Subcomponent("MSH")}}},
 		Field{FieldItem{Component{Subcomponent(buf[3])}}},
 		Field{FieldItem{Component{Subcomponent(string(buf[4:8]))}}},
+	}
+
+	// This is a sanity check for when the message consists only of a header.
+	// Although this is a bit strange, it's syntactically valid.
+	if len(buf) == 8 {
+		message = append(message, segment)
+		return message, &d, nil
+	}
+
+	// This is a sanity check for when the message has junk data after the
+	// header contents.
+	//
+	// TODO: find out if there are any implementations of HL7 that *actually*
+	// put more data after this header.
+	if len(buf) > 8 && buf[8] != fs {
+		return nil, nil, ErrInvalidHeader(stackerr.Newf("invalid character found after header content; expected \\x%02x but got \\x%02x", fs, buf[9]))
 	}
 
 	// These functions are used when we encounter control characters. When we
@@ -134,7 +158,9 @@ func ParseMessage(buf []byte) (Message, *Delimiters, error) {
 	// themselves.
 
 	sawNewline := false
-	for _, c := range buf[9:] {
+	for i, j := 9, len(buf); i < j; i++ {
+		c := buf[i]
+
 		switch c {
 		case '\r', '\n':
 			if !sawNewline {
