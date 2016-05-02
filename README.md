@@ -15,6 +15,13 @@ the protocol and querying the messages it contains.
 I have a [blog post](https://www.fknsrs.biz/blog/golang-hl7-library.html) on
 my website if you'd like to hear a bit more of the story.
 
+Install
+-------
+
+```
+$ go get fknsrs.biz/p/hl7
+```
+
 License
 -------
 
