@@ -79,18 +79,22 @@ var countTestCases = []countTestCase{
 }
 
 func TestCount(t *testing.T) {
-	a := assert.New(t)
+	for i := range countTestCases {
+		c := countTestCases[i]
 
-	for _, c := range countTestCases {
-		q, err := ParseQuery(c.q)
-		a.NoError(err)
+		t.Run(c.q, func(t *testing.T) {
+			a := assert.New(t)
 
-		m, _, err := ParseMessage(c.m)
-		a.NoError(err)
+			q, err := ParseQuery(c.q)
+			a.NoError(err)
 
-		if a.NotNil(q) && a.NotNil(m) {
-			l := q.Count(m)
-			a.Equal(c.c, l, q.String())
-		}
+			m, _, err := ParseMessage(c.m)
+			a.NoError(err)
+
+			if a.NotNil(q) && a.NotNil(m) {
+				l := q.Count(m)
+				a.Equal(c.c, l, q.String())
+			}
+		})
 	}
 }

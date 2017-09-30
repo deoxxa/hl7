@@ -116,14 +116,30 @@ var parserTestCases = []parserTestPair{
 }
 
 func TestParseQuery(t *testing.T) {
-	a := assert.New(t)
+	for i := range parserTestCases {
+		c := parserTestCases[i]
 
-	for _, c := range parserTestCases {
-		q, err := ParseQuery(c.s)
-		a.NoError(err)
+		t.Run(c.s, func(t *testing.T) {
+			a := assert.New(t)
 
-		if a.NotNil(q) {
-			a.Equal(*q, c.q, c.s)
-		}
+			q, err := ParseQuery(c.s)
+			a.NoError(err)
+
+			if a.NotNil(q) {
+				a.Equal(c.q, *q, c.s)
+			}
+		})
+	}
+}
+
+func BenchmarkQuery(b *testing.B) {
+	for i := range parserTestCases {
+		c := parserTestCases[i]
+
+		b.Run(c.s, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				ParseQuery(c.s)
+			}
+		})
 	}
 }
