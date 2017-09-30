@@ -1,57 +1,132 @@
 package hl7 // import "fknsrs.biz/p/hl7"
 
 import (
-	"regexp"
-	"strconv"
-
 	"github.com/facebookgo/stackerr"
 )
 
 type ErrInvalidQuery error
 
-var (
-	terserRegexp = regexp.MustCompile(`^([A-Z][A-Z0-9]+)(?:\(([0-9]{1,3})\))?(?:-([0-9]{1,3})(?:\(([0-9]{1,3})\))?(?:-([0-9]{1,3})(?:-([0-9]{1,3}))?)?)?$`)
-)
-
 func ParseQuery(s string) (*Query, error) {
-	m := terserRegexp.FindStringSubmatch(s)
-	if m == nil {
-		return nil, stackerr.Newf("can't parse query")
-	}
-
 	var q Query
 
-	q.Segment = m[1]
+	var offset int
 
-	if m[2] != "" {
-		n, _ := strconv.ParseInt(m[2], 10, 32)
-		q.SegmentOffset = max(int(n)-1, 0)
-		q.HasSegmentOffset = true
+	if err := parseQueryHeader(s, &offset, &q.Segment); err != nil {
+		return nil, err
+	}
+	if offset == len(s) {
+		return &q, nil
 	}
 
-	if m[3] != "" {
-		n, _ := strconv.ParseInt(m[3], 10, 32)
-		q.Field = max(int(n)-1, 0)
-		q.HasField = true
+	if err := parseQueryParen(s, &offset, &q.HasSegmentOffset, &q.SegmentOffset); err != nil {
+		return nil, err
+	}
+	if offset == len(s) {
+		return &q, nil
 	}
 
-	if m[4] != "" {
-		n, _ := strconv.ParseInt(m[4], 10, 32)
-		q.FieldOffset = max(int(n)-1, 0)
-		q.HasFieldOffset = true
+	if err := parseQueryNumber(s, &offset, &q.HasField, &q.Field); err != nil {
+		return nil, err
+	}
+	if offset == len(s) {
+		return &q, nil
 	}
 
-	if m[5] != "" {
-		n, _ := strconv.ParseInt(m[5], 10, 32)
-		q.Component = max(int(n)-1, 0)
-		q.HasComponent = true
+	if err := parseQueryParen(s, &offset, &q.HasFieldOffset, &q.FieldOffset); err != nil {
+		return nil, err
+	}
+	if offset == len(s) {
+		return &q, nil
 	}
 
-	if m[6] != "" {
-		n, _ := strconv.ParseInt(m[6], 10, 32)
-		q.SubComponent = max(int(n)-1, 0)
-		q.HasSubComponent = true
+	if err := parseQueryNumber(s, &offset, &q.HasComponent, &q.Component); err != nil {
+		return nil, err
+	}
+	if offset == len(s) {
+		return &q, nil
+	}
+
+	if err := parseQueryNumber(s, &offset, &q.HasSubComponent, &q.SubComponent); err != nil {
+		return nil, err
+	}
+	if offset == len(s) {
+		return &q, nil
+	}
+
+	if offset != len(s) {
+		return nil, stackerr.Newf("junk data found at position %d", offset)
 	}
 
 	return &q, nil
+}
+
+func parseQueryHeader(s string, o *int, v *string) error {
+	b := make([]byte, 0, 3)
+
+	var e int
+
+	for e = *o; e < len(s); e++ {
+		if !(s[e] >= 'A' && s[e] <= 'Z') && !(s[e] >= '0' && s[e] <= '9') {
+			break
+		}
+
+		b = append(b, s[e])
+	}
+
+	*v = string(b)
+	*o = e
+
+	return nil
+}
+
+func parseQueryParen(s string, o *int, b *bool, v *int) error {
+	if s[*o] != '(' {
+		return nil
+	}
+
+	var e int
+	var n int
+
+loop:
+	for e = *o + 1; e < len(s); e++ {
+		switch {
+		case s[e] >= '0' && s[e] <= '9':
+			n = (n * 10) + int(s[e]-'0')
+		case s[e] == ')':
+			break loop
+		default:
+			return stackerr.Newf("invalid byte (%q) found at offset %d", s[e], e)
+		}
+	}
+
+	*o = e + 1
+	*b = true
+	*v = max(n-1, 0)
+
+	return nil
+}
+
+func parseQueryNumber(s string, o *int, b *bool, v *int) error {
+	if s[*o] != '-' {
+		return nil
+	}
+
+	var e int
+	var n int
+
+loop:
+	for e = *o + 1; e < len(s); e++ {
+		switch {
+		case s[e] >= '0' && s[e] <= '9':
+			n = (n * 10) + int(s[e]-'0')
+		default:
+			break loop
+		}
+	}
+
+	*o = e
+	*b = true
+	*v = max(n-1, 0)
+
+	return nil
 }
