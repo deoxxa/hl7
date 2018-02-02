@@ -162,7 +162,7 @@ func ParseMessage(buf []byte) (Message, *Delimiters, error) {
 		c := buf[i]
 
 		switch c {
-		case '\r', '\n':
+		case '\r':
 			if !sawNewline {
 				commitSegment(true)
 			}
