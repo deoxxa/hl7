@@ -305,6 +305,22 @@ func TestParseSimpleContent(t *testing.T) {
 	}, m)
 }
 
+func TestParseLiteralNewline(t *testing.T) {
+	a := assert.New(t)
+
+	m, d, err := ParseMessage([]byte("MSH|^~\\&|Newline\nIn\nContent"))
+	a.NoError(err)
+	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
+	a.Equal(Message{
+		Segment{
+			Field{FieldItem{Component{"MSH"}}},
+			Field{FieldItem{Component{"|"}}},
+			Field{FieldItem{Component{"^~\\&"}}},
+			Field{FieldItem{Component{"Newline\nIn\nContent"}}},
+		},
+	}, m)
+}
+
 func TestParseBad(t *testing.T) {
 	a := assert.New(t)
 

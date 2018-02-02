@@ -1,6 +1,8 @@
 package hl7
 
-const longTestMessageContent = `MSH|^~\&||GA0000||VAERS PROCESSOR|20010331605||ORU^R01|20010422GA03|T|2.3.1|||AL|
+import "strings"
+
+var longTestMessageContent = strings.Replace(`MSH|^~\&||GA0000||VAERS PROCESSOR|20010331605||ORU^R01|20010422GA03|T|2.3.1|||AL|
 PID|||1234^^^^SR~1234-12^^^^LR~00725^^^^MR||Doe^John^Fitzgerald^JR^^^L||20001007|M||2106-3^White^HL70005|123 Peachtree St^APT 3B^Atlanta^GA^30210^^M^^GA067||(678) 555-1212^^PRN|
 NK1|1|Jones^Jane^Lee^^RN|VAB^Vaccine administered by (Name)^HL70063|
 NK1|2|Jones^Jane^Lee^^RN|FVP^Form completed by (Name)-Vaccine provider^HL70063|101 Main Street^^Atlanta^GA^38765^^O^^GA121||(404) 554-9097^^WPN|
@@ -60,4 +62,4 @@ OBX|1|ST|30975-7^Mfr./Imm. Proj. report no.^LN||12345678|
 OBX|2|TS|30976-5^Date received by manufacturer/immunization project^LN||12345678|
 OBX|3|CE|30977-3^15 day report^LN||N^No^HL70136|
 OBX|4|CE|30978-1^Report type^LN||IN^Initial^NIP010|
-`
+`, "\n", "\r", -1)
