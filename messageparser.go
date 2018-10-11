@@ -225,6 +225,13 @@ func unescape(b []byte, d *Delimiters) []byte {
 				r[j] = d.Escape
 				j++
 				r[j] = c
+				j++
+				i++
+				for ; b[i] != d.Escape; i++ {
+					r[j] = b[i]
+					j++
+				}
+				r[j] = d.Escape
 			}
 
 			j++
