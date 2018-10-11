@@ -321,10 +321,27 @@ func TestParseLiteralNewline(t *testing.T) {
 	}, m)
 }
 
-func TestParseTrailingHexEscapes(t *testing.T) {
+func TestParseHexEscapes(t *testing.T) {
 	a := assert.New(t)
 
 	m, d, err := ParseMessage([]byte(`MSH|^~\&|Foo\X41\|Bar\X42\Fred`))
+	a.NoError(err)
+	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
+	a.Equal(Message{
+		Segment{
+			Field{FieldItem{Component{`MSH`}}},
+			Field{FieldItem{Component{`|`}}},
+			Field{FieldItem{Component{`^~\&`}}},
+			Field{FieldItem{Component{`Foo\X41\`}}},
+			Field{FieldItem{Component{`Bar\X42\Fred`}}},
+		},
+	}, m)
+}
+
+func TestParseUnpairedInvalidHexEscapes(t *testing.T) {
+	a := assert.New(t)
+
+	m, d, err := ParseMessage([]byte(`MSH|^~\&|Foo\X41|Bar\X42\Fred`))
 	a.NoError(err)
 	a.Equal(&Delimiters{'|', '^', '~', '\\', '&'}, d)
 	a.Equal(Message{
