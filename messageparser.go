@@ -197,7 +197,7 @@ func ParseMessage(buf []byte) (Message, *Delimiters, error) {
 }
 
 func unescape(b []byte, d *Delimiters) []byte {
-	r := make([]byte, len(b))
+	r := make([]byte, len(b)+1) // +1 to make room for possible unpaired escape character
 
 	j, e := 0, false
 	for i := 0; i < len(b); i++ {
@@ -225,6 +225,13 @@ func unescape(b []byte, d *Delimiters) []byte {
 				r[j] = d.Escape
 				j++
 				r[j] = c
+				j++
+				i++
+				for ; i < len(b) && b[i] != d.Escape; i++ {
+					r[j] = b[i]
+					j++
+				}
+				r[j] = d.Escape
 			}
 
 			j++
