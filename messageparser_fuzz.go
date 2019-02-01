@@ -6,7 +6,7 @@ package hl7
 // Maybe you'll need the go-fuzz and go-fuzz-build binaries:
 // go get github.com/dvyukov/go-fuzz/go-fuzz github.com/dvyukov/go-fuzz/go-fuzz-build
 
-//go:generate go-fuzz-build fknsrs.biz/p/hl7
+//go:generate go-fuzz-build github.com/medbridge/hl7
 //go:generate mkdir -p /tmp/fuzz-hl7/corpus
 //go:generate sh -c "cp -a testdata/* /tmp/fuzz-hl7/corpus/"
 //go:generate echo go-fuzz -bin=hl7-fuzz.zip -workdir=/tmp/fuzz-hl7
